@@ -1,49 +1,77 @@
-package main
+package log
 
 import (
+	"github.com/op/go-logging"
 	"os"
+)
 
-		"github.com/op/go-logging"
-		)
+// Log is a default reference
+var Log *logging.Logger
 
-		var log = logging.MustGetLogger("example")
+func init() {
+	Log = GetLog(logging.ERROR)
+}
 
-		// Example format string. Everything except the message has a custom color
-		// which is dependent on the log level. Many fields have a custom output
-		// formatting too, eg. the time returns the hour down to the milli second.
-		var format = logging.MustStringFormatter(
-			`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`,
-			)
+// GetLog is a reference to a logging object
+func GetLog(level logging.Level) *logging.Logger {
 
-			// Password is just an example type implementing the Redactor interface. Any
-			// time this is logged, the Redacted() function will be called.
-			type Password string
+	log := logging.MustGetLogger("default")
 
-			func (p Password) Redacted() interface{} {
-				return logging.Redact(string(p))
-				}
+	var format = logging.MustStringFormatter(
+		`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`,
+	)
+	backend := logging.NewLogBackend(os.Stderr, "", 0)
 
-				func main() {
-					// For demo purposes, create two backend for os.Stderr.
-						backend1 := logging.NewLogBackend(os.Stderr, "", 0)
-							backend2 := logging.NewLogBackend(os.Stderr, "", 0)
+	// For messages written to backend2 we want to add some additional
+	// information to the output, including the used log level and the name of
+	// the function.
+	backendFormatter := logging.NewBackendFormatter(backend, format)
 
-								// For messages written to backend2 we want to add some additional
-									// information to the output, including the used log level and the name of
-										// the function.
-											backend2Formatter := logging.NewBackendFormatter(backend2, format)
+	// Only errors and more severe messages should be sent to backend
+	backendLeveled := logging.AddModuleLevel(backend)
+	backendLeveled.SetLevel(level, "")
 
-												// Only errors and more severe messages should be sent to backend1
-													backend1Leveled := logging.AddModuleLevel(backend1)
-														backend1Leveled.SetLevel(logging.ERROR, "")
+	// Set the backends to be used.
+	logging.SetBackend(backendLeveled, backendFormatter)
+	return log
+}
 
-															// Set the backends to be used.
-																logging.SetBackend(backend1Leveled, backend2Formatter)
+// Fatal is equivalent to l.Critical followed by a call to os.Exit(1).
+func Fatal(format string, args ...interface{}) {
+	Log.Fatalf(format, args)
+}
 
-																	log.Debugf("debug %s", Password("secret"))
-																		log.Info("info")
-																			log.Notice("notice")
-																				log.Warning("warning")
-																					log.Error("err")
-																						log.Critical("crit")
-																						}
+// Panic is equivalent to l.Critical followed by a call to panic().
+func Panic(format string, args ...interface{}) {
+	Log.Panicf(format, args)
+}
+
+// Critical logs a message using CRITICAL as log level.
+func Critical(format string, args ...interface{}) {
+	Log.Criticalf(format, args)
+}
+
+// Error logs a message using ERROR as log level.
+func Error(format string, args ...interface{}) {
+	Log.Errorf(format, args)
+}
+
+// Warning logs a message using WARNING as log level.
+func Warning(format string, args ...interface{}) {
+	Log.Warningf(format, args)
+}
+
+// Notice logs a message using NOTICE as log level.
+func Notice(format string, args ...interface{}) {
+	Log.Noticef(format, args)
+}
+
+// Info logs a message using INFO as log level.
+func Info(format string, args ...interface{}) {
+	Log.Infof(format, args)
+}
+
+// Debug logs a message using DEBUG as log level.
+func Debug(format string, args ...interface{}) {
+	Log.Debugf(format, args)
+}
