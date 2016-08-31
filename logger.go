@@ -19,7 +19,7 @@ func GetLog(level logging.Level) *logging.Logger {
 	log := logging.MustGetLogger("default")
 
 	var format = logging.MustStringFormatter(
-		`%{color}%{time:15:04:05.000} %{callpath:3} - %{level:.4s} %{message}`,
+		`%{color}%{time:15:04:05.000} %{callpath:3} - %{level} %{message}`,
 	)
 	backend := logging.NewLogBackend(os.Stderr, "", 0)
 
