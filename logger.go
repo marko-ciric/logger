@@ -1,8 +1,9 @@
 package log
 
 import (
-	"github.com/op/go-logging"
 	"os"
+
+	"github.com/op/go-logging"
 )
 
 // Log is a default reference
@@ -18,7 +19,7 @@ func GetLog(level logging.Level) *logging.Logger {
 	log := logging.MustGetLogger("default")
 
 	var format = logging.MustStringFormatter(
-		`%{color}%{time:15:04:05.000} %{shortfile} - %{level:.4s} %{id:03x}%{color:reset} %{message}`,
+		`%{color}%{time:15:04:05.000} %{callpath:3} - %{level:.4s} %{message}`,
 	)
 	backend := logging.NewLogBackend(os.Stderr, "", 0)
 
@@ -77,34 +78,42 @@ func Debugf(format string, args ...interface{}) {
 	Log.Debugf(format, args)
 }
 
+// Fatal ...
 func Fatal(args ...interface{}) {
 	Log.Fatal(args)
 }
 
+// Panic ...
 func Panic(args ...interface{}) {
 	Log.Panic(args)
 }
 
+// Critical ...
 func Critical(args ...interface{}) {
 	Log.Critical(args)
 }
 
+// Error ...
 func Error(args ...interface{}) {
 	Log.Error(args)
 }
 
+// Warning ...
 func Warning(args ...interface{}) {
 	Log.Warning(args)
 }
 
+// Notice ...
 func Notice(args ...interface{}) {
 	Log.Notice(args)
 }
 
+// Info ...
 func Info(args ...interface{}) {
 	Log.Info(args)
 }
 
+// Debug ...
 func Debug(args ...interface{}) {
 	Log.Debug(args)
 }
